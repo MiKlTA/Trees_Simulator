@@ -15,10 +15,14 @@ Field::Field()
             m_tiles[y][x] = new Tile;
         }
     }
+    
+    m_layers = new Layer[width()];
 }
 
 Field::~Field()
 {
+    delete m_layers;
+    
     for (int y = 0; y < height(); ++y)
     {
         for (int x = 0; x < width(); ++x)
@@ -33,7 +37,6 @@ Field::~Field()
 }
 
 
-#include <random>
 void Field::render(const glm::mat4 &view, const glm::mat4 &proj)
 {
     for (int y = 0; y < height(); ++y)
@@ -41,7 +44,6 @@ void Field::render(const glm::mat4 &view, const glm::mat4 &proj)
         for (int x = 0; x < width(); ++x)
         {
             m_rect->setPos(glm::vec2(x, y));
-            m_rect->setColor(glm::vec3(rand()/(RAND_MAX * 1.0f), 0.5f, 0.7f));
             m_rect->render(view, proj);
         }
     }

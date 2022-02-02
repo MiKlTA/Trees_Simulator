@@ -3,10 +3,28 @@
 
 
 
+#include <set>
+#include <queue>
+
 #include "opengl.h"
 
 #include "tile.h"
 #include "rect.h"
+
+
+
+struct Plate
+{
+    int bottom, top;
+    std::set<Plate *> parentPlates, childPlates;
+    
+    bool operator>(const Plate &p)
+    {
+        return top > p.top;
+    }
+};
+
+using Layer = std::priority_queue<Plate *>;
 
 
 
@@ -19,12 +37,15 @@ public:
     void render(const glm::mat4 &view, const glm::mat4 &proj);
     
     
-    int width() {return 200;};
-    int height() {return 50;};
+    
+    int width() const {return 200;};
+    int height() const {return 50;};
     
 private:
     Rect *m_rect;
     Tile ***m_tiles;
+    
+    Layer *m_layers;
 };
 
 

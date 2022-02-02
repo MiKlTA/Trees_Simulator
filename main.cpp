@@ -11,6 +11,8 @@ int main()
     w.setField(f);
     w.setSimcore(sc);
     
+//    w.setCamPos();
+    
     w.startWindowCycle();
     
     return 0;

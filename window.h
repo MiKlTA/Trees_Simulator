@@ -22,7 +22,7 @@ public:
     
     
     void setCamPos(glm::vec2 p) {m_camPos = p; updViewMat();}
-    void setCamSize(glm::vec2 s) {m_camScale = s; updViewMat();}
+    void setCamSize(float s) {m_camScale = s; updViewMat();}
     
     
     void setField(Field *f) {m_field = f;}
@@ -37,7 +37,7 @@ private:
     glm::ivec2 m_monSize;
     
     glm::vec2 m_camPos;
-    glm::vec2 m_camScale;
+    float m_camScale;
     glm::mat4 m_viewMat;
     glm::vec2 m_viewSize;
     glm::mat4 m_projMat;
@@ -48,6 +48,10 @@ private:
     SimulationCore *m_simcore;
     
     
+    
+    void handleInputCameraMove();
+    
+    void renderBackground();
     
     void updViewMat();
 };

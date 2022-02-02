@@ -3,10 +3,6 @@
 
 
 
-#include "opengl.h"
-
-
-
 class Tile
 {
 public:
@@ -14,7 +10,14 @@ public:
     
     
     
+    int spec() const {return m_spec;}
+    
+    
+    
+    int numSpec() const {return 8;}
+    
 private:
+    int m_spec; // 0 - leaf, (maxSpec - 1) - wood
 };
 
 

@@ -22,6 +22,8 @@ add_executable(trees_simulator
     field.cpp
     tile.h
     tile.cpp
+    tree.h
+    tree.cpp
     )
 
 include_directories(D:/mingw32_810/LIBS/opencl/source/external/OpenCL-Headers)
