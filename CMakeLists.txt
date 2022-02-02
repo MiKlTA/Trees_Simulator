@@ -20,6 +20,8 @@ add_executable(trees_simulator
     simulation_core.cpp
     field.h
     field.cpp
+    layer.h
+    layer.cpp
     tile.h
     tile.cpp
     tree.h

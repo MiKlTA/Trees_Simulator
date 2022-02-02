@@ -21,7 +21,10 @@ void SimulationCore::step()
 
 
 
-void calcGravitation()
+void SimulationCore::calcGravitation()
 {
-    
+    for (int x = 0; x < m_field->width(); ++x)
+    {
+        
+    }
 }

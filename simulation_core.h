@@ -3,14 +3,23 @@
 
 
 
+#include "field.h"
+
+
+
 class SimulationCore
 {
 public:
-    SimulationCore();
+    SimulationCore(Field *f);
     
     void step();
     
 private:
+    Field *m_field;
+    
+    
+    
+    void calcGravitation();
 };
 
 

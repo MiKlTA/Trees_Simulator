@@ -15,14 +15,10 @@ Field::Field()
             m_tiles[y][x] = new Tile;
         }
     }
-    
-    m_layers = new Layer[width()];
 }
 
 Field::~Field()
 {
-    delete m_layers;
-    
     for (int y = 0; y < height(); ++y)
     {
         for (int x = 0; x < width(); ++x)
