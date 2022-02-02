@@ -16,8 +16,6 @@ add_executable(trees_simulator
     rect.h
     rect.cpp
     
-    keyboard_listener.h
-    
     simulation_core.h
     simulation_core.cpp
     field.h

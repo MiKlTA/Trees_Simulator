@@ -3,9 +3,16 @@
 
 
 
+#include "opengl.h"
+
+
+
 class Tile
 {
 public:
+    Tile();
+    
+    
     
 private:
 };

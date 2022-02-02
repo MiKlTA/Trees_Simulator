@@ -11,6 +11,8 @@ int main()
     w.setField(f);
     w.setSimcore(sc);
     
+    w.setCamPos(glm::vec2(100.f))
+    
     w.startWindowCycle();
     
     return 0;
