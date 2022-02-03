@@ -90,6 +90,15 @@ void Tree::add(Tile *t)
     {
         mergePlates(l, r);
         eR = false;
+        if (eU)
+        {
+            if (!l->pointAtThisPlate(u))
+                l->
+        }
+        if (eD)
+        {
+            
+        }
     }
     else if (eL)
     {
@@ -103,6 +112,7 @@ void Tree::add(Tile *t)
     {
         
     }
+    
 }
 
 void Tree::rebuild()

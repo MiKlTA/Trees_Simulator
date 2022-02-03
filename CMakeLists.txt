@@ -12,16 +12,14 @@ add_executable(trees_simulator
     
     window.h
     window.cpp
-    
     rect.h
     rect.cpp
     
     simulation_core.h
     simulation_core.cpp
+    
     field.h
     field.cpp
-    layer.h
-    layer.cpp
     tile.h
     tile.cpp
     tree.h

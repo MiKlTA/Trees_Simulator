@@ -3,9 +3,18 @@
 
 
 
+class Tree;
+
+
+
 class Tile
 {
 public:
+    int x, y;
+    Tree *owner;
+    
+    
+    
     Tile();
     
     

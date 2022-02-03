@@ -3,7 +3,6 @@
 
 
 
-
 #include "opengl.h"
 
 #include "tile.h"
