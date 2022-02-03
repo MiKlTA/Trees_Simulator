@@ -21,7 +21,6 @@ add_executable(trees_simulator
     field.h
     field.cpp
     tile.h
-    tile.cpp
     tree.h
     tree.cpp
     )

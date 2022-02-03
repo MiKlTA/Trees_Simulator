@@ -4,16 +4,14 @@
 
 int main()
 {
-    Window w;
+    Window *w = Window::inst();
     
     Field *f = new Field;
-    SimulationCore *sc = new SimulationCore;
-    w.setField(f);
-    w.setSimcore(sc);
+    SimulationCore *sc = new SimulationCore(f);
+    w->setField(f);
+    w->setSimcore(sc);
     
-//    w.setCamPos();
-    
-    w.startWindowCycle();
+    w->startWindowCycle();
     
     return 0;
 }

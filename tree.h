@@ -4,66 +4,67 @@
 
 
 #include <vector>
-#include <algorithm>
 
 #include "opengl.h"
 
 #include "field.h"
-#include "tile.h"
-
-
-
-struct Plate
-{
-    int left, right;
-    int y;
-    std::vector<Plate *> m_foundPlates, m_hangingPlates;
-    
-    bool pointAtThisPlate(Plate *p)
-    {
-        const auto &f = m_foundPlates;
-        const auto &h = m_hangingPlates;
-        
-        return (std::find(f.begin(), f.end(), p) != f.end())
-                || (std::find(h.begin(), h.end(), p) != h.end());
-    }
-};
 
 
 
 class Tree
 {
 public:
+    
     Tree(Field *f, glm::ivec2 seedPos);
     
     void step();
+    void mutate();
     
-    
+    bool dead() const;
     
 private:
     Field *m_field;
     glm::ivec2 m_seedPos;
-    std::vector<Tile *> m_dna;
-    int m_carriage;
+    Dna_t m_dna;
+    unsigned int m_carriage;
     
-    std::vector<Tile *> m_parts;
-    std::vector<Plate *> m_plates;
+    std::vector<glm::ivec2> m_parts;
+    std::vector<glm::ivec2> m_seeds;
+    
+    int m_energy;
+    bool m_dead;
     
     
     
-    glm::ivec2 toFieldPos(glm::ivec2 p) const {return m_seedPos + p;}
-    glm::ivec2 toTreePos(glm::ivec2 p) const {return p - m_seedPos;}
-    bool haveFriendCellsNear(glm::ivec2 p) const;
+    glm::ivec2 toFieldPos(glm::ivec2 p) {return m_seedPos + p;}
+    bool haveTilesNear(glm::ivec2 p) const;
     
-    void mergePlates(Plate *rvr, Plate *cip);
-    void getPlatesNear(
-            glm::ivec2 p, Plate *&l, Plate *&r, Plate *&u, Plate *&d
-            );
-    bool intoSegment(int l, int r, int x) {return (x >= l && x <= r);}
+    void grow();
+    void die();
     
-    void add(Tile *t);
-    void rebuild();
-    void breakPlates();
+    void harvestEnergy();
+    void subtractEnergy();
+    int calcEnergy(int x, int startY);
+    
+    bool allSeedsReady();
+    
+    void createSeed(glm::ivec2 p);
+    void createPart(glm::ivec2 p);
+    
+    void randomAddToDna();
+    void randomChangeInDna();
+    void randomRemoveFromDna();
+    
+    
+    
+    static int growCost() {return 200;}
+    static int chanceAdding() {return 10;}
+    static int chanceChange() {return 5;}
+    static int chanceRemove() {return 20;}
+    static int chancesSum()
+    {
+        return chanceAdding() + chanceChange() + chanceRemove();
+    }
 };
 
 

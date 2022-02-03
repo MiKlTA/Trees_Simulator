@@ -15,7 +15,7 @@
 class Window
 {
 public:
-    Window();
+    static Window * inst();
     
     int getMonitorWidth() const {return m_monSize.x;};
     int getMonitorHeight() const {return m_monSize.y;};
@@ -33,6 +33,9 @@ public:
     void startWindowCycle();
     
 private:
+    Window();
+    static Window *m_instance;
+    
     GLFWwindow *m_window;
     glm::ivec2 m_monSize;
     
@@ -54,6 +57,16 @@ private:
     void renderBackground();
     
     void updViewMat();
+    void updProjMat();
+    
+    
+    
+    static void keyCallback(
+            GLFWwindow *aWindow, int key, int scancode, int action, int mode
+            );
+    
+    static float dCamPos() {return 7.f;}
+    static float kCamScale() {return 1.07f;}
 };
 
 

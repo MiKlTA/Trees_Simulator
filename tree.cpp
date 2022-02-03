@@ -2,16 +2,25 @@
 
 
 
-
 Tree::Tree(Field *f, glm::ivec2 seedPos)
     : m_field(f),
       m_seedPos(seedPos),
       m_dna(),
       m_carriage(0),
       
-      m_plates()
+      m_parts(),
+      m_seeds(),
+      
+      m_energy(),
+      m_dead(false)
 {
+    Tile *seed = f->getTile(seedPos);
+    m_energy = seed->storedEnergy;
+    m_dna = seed->dna;
     
+    delete seed;
+    f->setTile(seedPos, nullptr);
+    grow();
 }
 
 
@@ -21,123 +30,190 @@ void Tree::step()
     
 }
 
+void Tree::mutate()
+{
+    int rnd = rand() % chancesSum();
+    if (rnd < chanceAdding())
+    {
+        randomAddToDna();
+    }
+    else if (rnd < chanceAdding() + chanceChange())
+    {
+        randomChangeInDna();
+    }
+    else if (rnd < chanceAdding() + chanceChange() + chanceRemove())
+    {
+        randomRemoveFromDna();
+    }
+}
+
 
 
 // private:
 
 
 
-bool Tree::haveFriendCellsNear(glm::ivec2 p) const
+bool Tree::haveTilesNear(glm::ivec2 p) const
 {
-    
-}
-
-
-
-void Tree::mergePlates(Plate *rvr, Plate *cip)
-{
-    if (rvr->left < cip->left)
+    for (auto i : m_parts)
     {
-        rvr->right = cip->right;
-    }
-    else
-    {
-        rvr->left = cip->right;
-    }
-    
-    for (Plate *fp : cip->m_foundPlates)
-        rvr->m_foundPlates.push_back(fp);
-    
-    for (Plate *hp : cip->m_hangingPlates)
-        rvr->m_foundPlates.push_back(hp);
-}
-
-void Tree::getPlatesNear(
-        glm::ivec2 p, Plate *&l, Plate *&r, Plate *&u, Plate *&d
-        )
-{
-    l = r = u = d = nullptr;
-    for (auto pp : m_plates)
-    {
-        if (intoSegment(pp->left, pp->right, p.x))
+        if (i.x == p.x)
         {
-            if (pp->y == p.y + 1) u = pp; 
-            if (pp->y == p.y - 1) d = pp; 
+            if (i.y == p.y + 1 || i.y == p.y - 1)
+                return true;
         }
-        
-        if (pp->y == p.y)
+        if (i.y == p.y)
         {
-            if (pp->right == p.x - 1) l = pp;
-            if (pp->left == p.x + 1) r = pp;
+            if (i.x == p.x + 1 || i.x == p.x - 1)
+                return true;
         }
     }
+    return false;
 }
 
 
 
-void Tree::add(Tile *t)
+void Tree::grow()
 {
-    glm::ivec2 p(t->x, t->y);
+    if (m_carriage >= m_dna.size())
+        return;
+    auto c = m_dna[m_carriage];
     
-    Plate *l, *r, *u, *d;
-    getPlatesNear(p, l, r, u, d);
-    bool eL = (l != nullptr),
-         eR = (r != nullptr),
-         eU = (u != nullptr),
-         eD = (d != nullptr);
+    glm::ivec2 p = toFieldPos({c.x, c.y});
     
-    if (eL && eR)
-    {
-        mergePlates(l, r);
-        eR = false;
-    }
-    else if (eL)
-    {
-        
-    }
-    else if (eR)
-    {
-        
-    }
+    if (
+            !(
+                (haveTilesNear(p) || m_carriage == 0)
+                && m_field->getTile(p) == nullptr
+                && m_field->inRange(p.y)
+                )
+            )
+        return;
+    
+    Tile *t = new Tile;
+    t->spec = c.spec;
+    t->dna = m_dna;
+    t->storedEnergy = 0;
+    t->isFalling = false;
+    
+    m_field->setTile(p, t);
+    if (c.spec == -1)
+        m_seeds.push_back(p);
     else
+        m_parts.push_back(p);
+    
+    m_carriage++;
+}
+
+void Tree::die()
+{
+    m_dead = true;
+    
+    for (auto p : m_parts)
     {
-        
+        if (m_field->getTile(p) != nullptr)
+        {
+            delete m_field->getTile(p);
+            m_field->setTile(p, nullptr);
+        }
+    }
+    
+    for (auto s : m_seeds)
+    {
+        m_field->getTile(s)->isFalling = true;
     }
 }
 
-void Tree::rebuild()
+
+
+void Tree::harvestEnergy()
 {
-    for (auto pt : m_plates)
+    int energy = 0;
+    for (auto pt : m_parts)
     {
-        delete pt;
+        energy += m_field->getTile(pt)->spec * calcEnergy(pt.x, pt.y + 1);
     }
-    m_plates.clear();
     
-    bool wereChanges = true;
-    bool checkedParts[m_parts.size()];
-    for (unsigned int i = 0; i < m_parts.size(); ++i) checkedParts[i] = false;
-    while (wereChanges)
+    for (auto s : m_seeds)
     {
-        wereChanges = false;
-        for (unsigned int i = 0; i < m_parts.size(); ++i)
+        auto cur = m_field->getTile(s);
+        if (cur->storedEnergy < cur->maxStoredEnergy())
         {
-            glm::ivec2 p(m_parts[i]->x, m_parts[i]->y);
-            if ((!checkedParts[i]) && haveFriendCellsNear(p))
+            if (energy == 0)
+                return;
+            energy--;
+        }
+    }
+}
+
+void Tree::subtractEnergy()
+{
+    m_energy -= m_parts.size();
+    m_energy -= m_seeds.size();
+    if (m_energy <= 0)
+        m_dead = true;
+}
+
+int Tree::calcEnergy(int x, int startY)
+{
+    int energy = 10;
+    for (int y = startY; y < m_field->height(); ++y)
+    {
+        Tile *cur = m_field->getTile({x, y});
+        if (cur != nullptr)
+        {
+            if (cur->spec != -1)
             {
-                checkedParts[i] = true;
-                wereChanges = true;
-                add(m_field->getTile(toFieldPos(p)));
+                energy = std::max(0, energy - 2 * (cur->spec + 1));
             }
         }
     }
-    
-    for (unsigned int i = m_parts.size() - 1; i >= 0; --i)
-    {
-        m_parts.erase(m_parts.begin() + i);
-    }
+    return energy;
 }
 
-void Tree::breakPlates()
+bool Tree::allSeedsReady()
 {
-    
+    bool ready = true;
+    for (auto s : m_seeds)
+    {
+        auto cur = m_field->getTile(s);
+        ready &= cur->storedEnergy < cur->maxStoredEnergy();
+    }
+    return ready;
+}
+
+
+
+
+
+void Tree::randomAddToDna()
+{
+    DnaCodon_t codon;
+    codon.spec = rand() % (Tile::numSpec() + 1);
+    while (true)
+    {
+        int i = rand() % m_dna.size();
+        glm::ivec2 randP(m_dna[i].x, m_dna[i].y);
+        randP.x += (rand() % 3) - 1;
+        randP.y += (rand() % 3) - 1;
+        for (auto c : m_dna)
+        {
+            if (c.x == randP.x && c.y == randP.y)
+                goto cycleBreak;
+        }
+    }
+    cycleBreak:
+    m_dna.push_back(codon);
+}
+
+void Tree::randomChangeInDna()
+{
+    int i = rand() % m_dna.size();
+    m_dna[i].spec = rand() % (Tile::numSpec() + 1);
+}
+
+void Tree::randomRemoveFromDna()
+{
+    if (m_dna.size() <= 1) return;
+    m_dna.erase(m_dna.begin() + rand() % m_dna.size());
 }

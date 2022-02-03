@@ -3,30 +3,30 @@
 
 
 
-class Tree;
+#include <vector>
 
 
 
-class Tile
+struct DnaCodon_t
 {
-public:
-    int x, y;
-    Tree *owner;
+    int x, y, spec;
+};
+using Dna_t = std::vector<DnaCodon_t>;
+
+
+
+struct Tile
+{
+    int spec; // (-1) - seed, 0 - wood, ..., (maxSpec - 1) - leaf
+    int storedEnergy;
+    bool isFalling;
+    
+    Dna_t dna;
     
     
     
-    Tile();
-    
-    
-    
-    int spec() const {return m_spec;}
-    
-    
-    
-    int numSpec() const {return 8;}
-    
-private:
-    int m_spec; // 0 - leaf, (maxSpec - 1) - wood
+    static int numSpec() {return 8;}
+    static int maxStoredEnergy() {return 1000;}
 };
 
 
