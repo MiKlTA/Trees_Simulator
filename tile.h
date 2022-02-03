@@ -17,7 +17,7 @@ using Dna_t = std::vector<DnaCodon_t>;
 
 struct Tile
 {
-    int spec; // (-1) - seed, 0 - wood, ..., (maxSpec - 1) - leaf
+    int spec; // (-1) - seed, 0 - wood, ..., (maxGrn() - 1) - leaf
     int storedEnergy;
     bool isFalling;
     
@@ -25,7 +25,7 @@ struct Tile
     
     
     
-    static int numSpec() {return 8;}
+    static int maxGrn() {return 8;}
     static int maxStoredEnergy() {return 1000;}
 };
 

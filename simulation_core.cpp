@@ -14,7 +14,7 @@ SimulationCore::SimulationCore(Field *f)
     DnaCodon_t codon;
     codon.x = 0;
     codon.y = 0;
-    codon.spec = 0;
+    codon.spec = Tile::maxGrn() - 1;
     t->dna.push_back(codon);
     codon.x = 0;
     codon.y = 1;

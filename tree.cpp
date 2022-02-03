@@ -17,6 +17,8 @@ Tree::Tree(Field *f, glm::ivec2 seedPos)
     Tile *seed = f->getTile(seedPos);
     m_energy = seed->storedEnergy;
     m_dna = seed->dna;
+    if (rand() % chanceMutation() == 0)
+        mutate();
     
     delete seed;
     f->setTile(seedPos, nullptr);
@@ -27,7 +29,17 @@ Tree::Tree(Field *f, glm::ivec2 seedPos)
 
 void Tree::step()
 {
+    if (m_dead) return;
     
+    harvestEnergy();
+    subtractEnergy();
+    if (canGrow())
+    {
+        m_energy -= growCost();
+        grow();
+    }
+    if (allSeedsReady() && m_carriage == m_dna.size())
+        die();
 }
 
 void Tree::mutate()
@@ -75,8 +87,6 @@ bool Tree::haveTilesNear(glm::ivec2 p) const
 
 void Tree::grow()
 {
-    if (m_carriage >= m_dna.size())
-        return;
     auto c = m_dna[m_carriage];
     
     glm::ivec2 p = toFieldPos({c.x, c.y});
@@ -88,7 +98,10 @@ void Tree::grow()
                 && m_field->inRange(p.y)
                 )
             )
+    {
+        m_carriage++;
         return;
+    }
     
     Tile *t = new Tile;
     t->spec = c.spec;
@@ -134,14 +147,28 @@ void Tree::harvestEnergy()
         energy += m_field->getTile(pt)->spec * calcEnergy(pt.x, pt.y + 1);
     }
     
-    for (auto s : m_seeds)
+    energy /= 2;
+    m_energy += energy + (energy % 2);
+    
+    if (!m_seeds.empty())
     {
-        auto cur = m_field->getTile(s);
-        if (cur->storedEnergy < cur->maxStoredEnergy())
+        int energyPerSeed = energy / m_seeds.size();
+        int rem = energy % m_seeds.size();
+        for (auto s : m_seeds)
         {
-            if (energy == 0)
-                return;
-            energy--;
+            auto cur = m_field->getTile(s);
+            if (cur->storedEnergy < cur->maxStoredEnergy())
+            {
+                if (rem == 0)
+                {
+                    rem--;
+                    cur->storedEnergy++;
+                }
+                cur->storedEnergy += energyPerSeed;
+                cur->storedEnergy = std::max(
+                            cur->maxStoredEnergy(), cur->storedEnergy
+                            );
+            }
         }
     }
 }
@@ -177,7 +204,7 @@ bool Tree::allSeedsReady()
     for (auto s : m_seeds)
     {
         auto cur = m_field->getTile(s);
-        ready &= cur->storedEnergy < cur->maxStoredEnergy();
+        ready &= cur->storedEnergy == cur->maxStoredEnergy();
     }
     return ready;
 }
@@ -189,7 +216,7 @@ bool Tree::allSeedsReady()
 void Tree::randomAddToDna()
 {
     DnaCodon_t codon;
-    codon.spec = rand() % (Tile::numSpec() + 1);
+    codon.spec = rand() % (Tile::maxGrn() + 1);
     while (true)
     {
         int i = rand() % m_dna.size();
@@ -209,7 +236,7 @@ void Tree::randomAddToDna()
 void Tree::randomChangeInDna()
 {
     int i = rand() % m_dna.size();
-    m_dna[i].spec = rand() % (Tile::numSpec() + 1);
+    m_dna[i].spec = rand() % (Tile::maxGrn() + 1);
 }
 
 void Tree::randomRemoveFromDna()

@@ -39,6 +39,7 @@ private:
     glm::ivec2 toFieldPos(glm::ivec2 p) {return m_seedPos + p;}
     bool haveTilesNear(glm::ivec2 p) const;
     
+    bool canGrow() {return m_carriage < m_dna.size() && m_energy >= growCost();}
     void grow();
     void die();
     
@@ -58,6 +59,7 @@ private:
     
     
     static int growCost() {return 200;}
+    static int chanceMutation() {return 10;}
     static int chanceAdding() {return 10;}
     static int chanceChange() {return 5;}
     static int chanceRemove() {return 20;}

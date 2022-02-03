@@ -69,9 +69,9 @@ void Field::prepareRenderTile(glm::ivec2 p)
             color = seedColor();
         else
             color = linearInterp(
-                        woodColor(),
                         leafColor(),
-                        getTile(p)->storedEnergy / (Tile::numSpec() * 1.f)
+                        woodColor(),
+                        getTile(p)->spec / (Tile::maxGrn() * 1.f)
                         );
     }
     m_rect->setColor(color);
