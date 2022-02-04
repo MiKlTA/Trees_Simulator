@@ -13,6 +13,7 @@ SimulationCore::SimulationCore(Field *f)
     t->spec = -1;
     t->storedEnergy = t->maxStoredEnergy();
     t->isFalling = true;
+    t->parentPos = {-1, -1};
     DnaCodon_t codon;
     codon.x = 0;
     codon.y = 0;

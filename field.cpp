@@ -75,6 +75,8 @@ void Field::save(std::ofstream &out)
                 out << m_tiles[y][x]->spec  << ' ';
                 out << m_tiles[y][x]->isFalling << ' ';
                 out << m_tiles[y][x]->storedEnergy << ' ';
+                out << m_tiles[y][x]->parentPos.x << ' '
+                    << m_tiles[y][x]->parentPos.y << ' ';
                 out << m_tiles[y][x]->dna.size() << ' ';
                 for (DnaCodon_t c : m_tiles[y][x]->dna)
                 {
@@ -107,6 +109,7 @@ void Field::load(std::ifstream &in)
                 in >> t->spec;
                 in >> t->isFalling;
                 in >> t->storedEnergy;
+                in >> t->parentPos.x >> t->parentPos.y;
                 int dnaSize;
                 in >> dnaSize;
                 for (int i = 0; i < dnaSize; ++i)

@@ -5,6 +5,8 @@
 
 #include <vector>
 
+#include "opengl.h"
+
 
 
 struct DnaCodon_t
@@ -23,6 +25,8 @@ struct Tile
     bool isFalling;
     
     Dna_t dna;
+    
+    glm::ivec2 parentPos;
     
     bool isSeed() const {return spec == -1;}
     

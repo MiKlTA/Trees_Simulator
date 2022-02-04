@@ -18,6 +18,8 @@ public:
     Tree(Field *f);
     Tree(Field *f, glm::ivec2 seedPos);
     
+    glm::ivec2 getPos() {return m_seedPos;}
+    
     void step();
     void mutate();
     

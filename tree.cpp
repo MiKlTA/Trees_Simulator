@@ -219,6 +219,7 @@ void Tree::grow()
     t->dna = m_dna;
     t->storedEnergy = 0;
     t->isFalling = false;
+    t->parentPos = m_seedPos;
     
     m_field->setTile(p, t);
     if (c.isSeed())
@@ -245,7 +246,9 @@ void Tree::die()
     
     for (auto s : m_seeds)
     {
-        m_field->getTile(s)->isFalling = true;
+        Tile *seed = m_field->getTile(s);
+        seed->isFalling = true;
+        seed->parentPos = {-1, -1};
     }
 }
 

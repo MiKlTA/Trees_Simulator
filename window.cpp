@@ -59,6 +59,7 @@ Window::Window()
       m_field(nullptr),
       m_simcore(nullptr),
       m_previewField(nullptr),
+      m_previewTree(nullptr),
       m_previewIsOn(false)
 {
     glfwInit();
@@ -168,7 +169,9 @@ void Window::setPreview(bool previewIsOn)
         t->spec = -1;
         t->isFalling = false;
         t->storedEnergy = 1;
-        glm::ivec2 seedPos(100, 0);
+        glm::ivec2 seedPos(target->parentPos);
+        if (seedPos.x < 0 || seedPos.y < 0)
+            seedPos = {100, 0};
         m_previewField->setTile(seedPos, t);
         
         m_previewTree = new Tree(m_previewField, seedPos);
@@ -180,7 +183,11 @@ void Window::setPreview(bool previewIsOn)
     else
     {
         m_previewField->clear();
-        delete m_previewTree;
+        if (m_previewTree != nullptr)
+        {
+            delete m_previewTree;
+            m_previewTree = nullptr;
+        }
         
         m_previewIsOn = false;
     }
