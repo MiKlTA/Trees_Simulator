@@ -10,6 +10,7 @@
 struct DnaCodon_t
 {
     int x, y, spec;
+    bool isSeed() const {return spec == -1;}
 };
 using Dna_t = std::vector<DnaCodon_t>;
 
@@ -23,10 +24,15 @@ struct Tile
     
     Dna_t dna;
     
+    bool isSeed() const {return spec == -1;}
+    
+    
     
     
     static int maxGrn() {return 8;}
-    static int maxStoredEnergy() {return 1000;}
+    static int specCount() {return 9;}
+    static int specShift() {return -1;}
+    static int maxStoredEnergy() {return 10;}
 };
 
 

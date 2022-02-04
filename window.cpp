@@ -30,8 +30,10 @@ void Window::startWindowCycle()
         
         glClear(GL_COLOR_BUFFER_BIT);
         
-        renderBackground();
-        m_field->render(m_viewMat, m_projMat);
+        if (!m_previewIsOn)
+            m_field->render(m_viewMat, m_projMat);
+        else
+            m_previewField->render(m_viewMat, m_projMat);
         
         glfwSwapBuffers(m_window);
     }
@@ -52,8 +54,12 @@ Window::Window()
       m_viewSize(),
       m_projMat(),
       
+      m_mousePos(0.0f)
+      
       m_field(nullptr),
-      m_simcore(nullptr)
+      m_simcore(nullptr),
+      m_previewField(new Field),
+      m_previewIsOn(false)
 {
     glfwInit();
     
@@ -80,6 +86,11 @@ Window::Window()
     updProjMat();
     m_camPos = glm::vec2(100.0f, 25.0f);
     updViewMat();
+}
+
+Window::~Window()
+{
+    delete m_previewField;
 }
 
 
@@ -118,11 +129,28 @@ void Window::handleInputCameraMove()
     }
 }
 
-
-
-void Window::renderBackground()
+glm::ivec2 Window::getMouseFieldPos()
 {
     
+}
+
+
+
+void Window::setPreview(bool previewIsOn)
+{
+    if (previewIsOn)
+    {
+        Tile *target = m_field->getTile(getMouseFieldPos());
+        
+        Tile *t = new Tile;
+        t->
+        m_previewField->setTile({100, 0}, t);
+    }
+    else
+    {
+        m_previewField->clear();
+        m_previewIsOn = false;
+    }
 }
 
 
@@ -177,5 +205,55 @@ void Window::keyCallback(
             break;
         }
         break;
+    case GLFW_KEY_K:
+        switch (action)
+        {
+        case GLFW_PRESS:
+            std::ofstream out("save.txt");
+            if (!out.is_open())
+                return;
+            w->m_simcore->save(out);
+            out.close();
+            break;
+        }
+        break;
+    case GLFW_KEY_L:
+        switch (action)
+        {
+        case GLFW_PRESS:
+            std::ifstream in("save.txt");
+            if (!in.is_open())
+                return;
+            w->m_simcore->load(in);
+            in.close();
+            break;
+        }
+        break;
+    case GLFW_KEY_R:
+        switch (action)
+        {
+        case GLFW_PRESS:
+            std::ofstream out("data.txt");
+            if (!out.is_open())
+                return;
+            w->m_simcore->print(out);
+            out.close();
+            break;
+        }
+        break;
+    case GLFW_KEY_V:
+        switch (action)
+        {
+        case GLFW_PRESS:
+            w->setPreview(!w->m_previewIsOn);
+        }
+        break;
     }
+}
+
+void Window::mouse_button_callback(
+        GLFWwindow* window, int button, int action, int mods
+        )
+{
+    
 }

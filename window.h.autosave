@@ -66,6 +66,9 @@ private:
             );
     static void cursorPosCallback(GLFWwindow* window, double x, double y)
     {Window::inst()->m_mousePos = glm::vec2(x, y);}
+    static void mouse_button_callback(
+            GLFWwindow* window, int button, int action, int mods
+            );
     
     static float dCamPos() {return 1.f;}
     static float kCamScale() {return 1.01f;}

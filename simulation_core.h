@@ -4,6 +4,8 @@
 
 
 #include <vector>
+#include <iostream>
+#include <fstream>
 
 #include "field.h"
 
@@ -22,11 +24,16 @@ public:
     void step();
     void forcedStep();
     
+    void save(std::ofstream &out);
+    void load(std::ifstream &in);
+    void print(std::ofstream &out);
+    
 private:
     Field *m_field;
     std::vector<Tree *> m_trees;
     
     bool m_paused;
+    long long m_stepsCount;
     
     
     

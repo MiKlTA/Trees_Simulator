@@ -5,7 +5,9 @@
 SimulationCore::SimulationCore(Field *f)
     : m_field(f),
       m_trees(),
-      m_paused(true)
+      
+      m_paused(true),
+      m_stepsCount(0)
 {
     Tile *t = new Tile;
     t->spec = -1;
@@ -33,9 +35,23 @@ void SimulationCore::step()
 
 void SimulationCore::forcedStep()
 {
-    for (auto pt : m_trees)
+    m_stepsCount++;
+    std::cout << m_stepsCount << std::endl;
+    if (m_stepsCount == 1804)
     {
-        pt->step();
+        int a = 0;
+        a++;
+    }
+    
+    for (int i = m_trees.size() - 1; i >= 0; --i)
+    {
+        Tree *t = m_trees[i];
+        if (t->isDead())
+        {
+            m_trees.erase(m_trees.begin() + i);
+            continue;
+        }
+        t->step();
     }
     
     for (int x = 0; x < m_field->width(); ++x)
@@ -45,14 +61,56 @@ void SimulationCore::forcedStep()
             glm::ivec2 p(x, y);
             Tile *cur = m_field->getTile(p);
             if (cur != nullptr)
-            {
-                if (cur->spec == -1 && cur->isFalling)
+                if (cur->isSeed() && cur->isFalling)
                 {
-                    moveSeed(p);
+                    if (y == 0)
+                    {
+                        m_field->setTile(p, nullptr);
+                        delete cur;
+                    }
+                    else
+                        moveSeed(p);
                 }
-            }
         }
     }
+}
+
+
+
+void SimulationCore::save(std::ofstream &out)
+{
+    out << m_stepsCount << std::endl;
+    m_field->save(out);
+    
+    out << m_trees.size() << std::endl;
+    for (Tree *t : m_trees)
+        t->save(out);
+}
+
+void SimulationCore::load(std::ifstream &in)
+{
+    in >> m_stepsCount;
+    m_field->load(in);
+    
+    for (Tree *t : m_trees)
+        delete t;
+    m_trees.clear();
+    
+    int treesCount = 0;
+    in >> treesCount;
+    for (int i = 0; i < treesCount; ++i)
+    {
+        Tree *t = new Tree(m_field);
+        t->load(in);
+        m_trees.push_back(t);
+    }
+}
+
+void SimulationCore::print(std::ofstream &out)
+{
+    out << "Trees count: " << m_trees.size() << " |" << std::endl;
+    for (Tree *t : m_trees)
+        t->print(out);
 }
 
 

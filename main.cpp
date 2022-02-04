@@ -7,9 +7,9 @@
 
 int main()
 {
-    int seed;
-    std::cin >> seed;
-    std::srand(seed);
+//    int seed;
+//    std::cin >> seed;
+    std::srand(5);
     
     Window *w = Window::inst();
     

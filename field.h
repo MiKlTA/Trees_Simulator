@@ -3,6 +3,8 @@
 
 
 
+#include <fstream>
+
 #include "opengl.h"
 
 #include "tile.h"
@@ -18,19 +20,24 @@ public:
     
     void render(const glm::mat4 &view, const glm::mat4 &proj);
     
-    Tile * getTile(glm::ivec2 p) {return m_tiles[p.y][p.x];}
-    void setTile(glm::ivec2 p, Tile *t) {m_tiles[p.y][p.x] = t;}
+    Tile * getTile(glm::ivec2 p) {return m_tiles[p.y][normalizeXCoord(p.x)];}
+    void setTile(glm::ivec2 p, Tile *t)
+    {m_tiles[p.y][normalizeXCoord(p.x)] = t;}
+    void clear();
     
     int normalizeXCoord(int x)
     {
-        if (x > 0)
+        if (x >= 0)
             return x % width();
         else
-            return (((-x)/width() + 1) * width() + x);
+            return (width() - ((-x) % width())) % width();
     }
     
     glm::vec3 linearInterp(glm::vec3 v1, glm::vec3 v2, float t)
     {return t * v1 + (1.f - t) * v2;}
+    
+    void save(std::ofstream &out);
+    void load(std::ifstream &in);
     
     
     
