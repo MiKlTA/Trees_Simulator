@@ -22,6 +22,7 @@ public:
     void mutate();
     
     void cheatingGrow() {grow();}
+    bool canCheatingGrow() {return m_carriage < m_dna.size();}
     
     bool isDead() const {return m_dead;}
     

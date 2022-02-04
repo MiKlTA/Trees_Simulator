@@ -47,6 +47,7 @@ private:
     Field *m_field;
     SimulationCore *m_simcore;
     Field *m_previewField;
+    Tree *m_previewTree;
     bool m_previewIsOn;
     
     
@@ -66,6 +67,9 @@ private:
             );
     static void cursorPosCallback(GLFWwindow* window, double x, double y)
     {Window::inst()->m_mousePos = glm::vec2(x, y);}
+    static void mouseButtonCallback(
+            GLFWwindow* window, int button, int action, int mods
+            );
     
     static float dCamPos() {return 1.f;}
     static float kCamScale() {return 1.01f;}

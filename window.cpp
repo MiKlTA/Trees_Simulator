@@ -54,11 +54,11 @@ Window::Window()
       m_viewSize(),
       m_projMat(),
       
-      m_mousePos(0.0f)
+      m_mousePos(0.0f),
       
       m_field(nullptr),
       m_simcore(nullptr),
-      m_previewField(new Field),
+      m_previewField(nullptr),
       m_previewIsOn(false)
 {
     glfwInit();
@@ -73,6 +73,8 @@ Window::Window()
                 );
     
     glfwSetKeyCallback(m_window, keyCallback);
+    glfwSetCursorPosCallback(m_window, cursorPosCallback);
+    glfwSetMouseButtonCallback(m_window, mouseButtonCallback);
     
     glfwMakeContextCurrent(m_window);
     glfwMaximizeWindow(m_window);
@@ -86,6 +88,8 @@ Window::Window()
     updProjMat();
     m_camPos = glm::vec2(100.0f, 25.0f);
     updViewMat();
+    
+    m_previewField = new Field;
 }
 
 Window::~Window()
@@ -131,7 +135,18 @@ void Window::handleInputCameraMove()
 
 glm::ivec2 Window::getMouseFieldPos()
 {
+    int height, width;
+    glfwGetWindowSize(m_window, &width, &height);
     
+    glm::vec2 p(m_mousePos.x, height - m_mousePos.y);
+    p.x /= (width * 1.0f);
+    p.y /= (height * 1.0f);
+    
+    glm::vec2 screenSize = m_viewSize * m_camScale;
+    p *= screenSize;
+    
+    p += m_camPos - screenSize / 2.0f;
+    return glm::ivec2(p.x, p.y);
 }
 
 
@@ -140,15 +155,33 @@ void Window::setPreview(bool previewIsOn)
 {
     if (previewIsOn)
     {
-        Tile *target = m_field->getTile(getMouseFieldPos());
+        glm::ivec2 p = getMouseFieldPos();
+        if (p.x >= m_field->width() || p.x < 0
+                || p.y >= m_field->height() || p.y < 0)
+            return;
+        Tile *target = m_field->getTile(p);
+        if (target == nullptr)
+            return;
         
         Tile *t = new Tile;
-        t->
-        m_previewField->setTile({100, 0}, t);
+        t->dna = target->dna;
+        t->spec = -1;
+        t->isFalling = false;
+        t->storedEnergy = 1;
+        glm::ivec2 seedPos(100, 0);
+        m_previewField->setTile(seedPos, t);
+        
+        m_previewTree = new Tree(m_previewField, seedPos);
+        while (m_previewTree->canCheatingGrow())
+            m_previewTree->cheatingGrow();
+        
+        m_previewIsOn = true;
     }
     else
     {
         m_previewField->clear();
+        delete m_previewTree;
+        
         m_previewIsOn = false;
     }
 }
@@ -251,7 +284,7 @@ void Window::keyCallback(
     }
 }
 
-void Window::mouse_button_callback(
+void Window::mouseButtonCallback(
         GLFWwindow* window, int button, int action, int mods
         )
 {
