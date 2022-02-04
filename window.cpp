@@ -288,5 +288,20 @@ void Window::mouseButtonCallback(
         GLFWwindow* window, int button, int action, int mods
         )
 {
+    Window *w = Window::inst();
     
+    switch (button)
+    {
+    case GLFW_MOUSE_BUTTON_LEFT:
+        switch (action)
+        {
+        case GLFW_PRESS:
+            w->setPreview(true);
+            break;
+        case GLFW_RELEASE:
+            w->setPreview(false);
+            break;
+        }
+        break;
+    }
 }
